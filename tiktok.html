@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Posts Automático | NovaStack</title>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        @charset "UTF-8";
+
+        /* ==========================================================================
+           1. VARIÁVEIS E BASE
+           ========================================================================== */
+        :root {
+            --space-void: #020202;
+            --space-dark: #0a0a0c;
+            --surface-glass: rgba(18, 18, 22, 0.65);
+            --surface-solid: #121216;
+            --text-pure: #ffffff;
+            --text-silver: #a4a4ac;
+            --border-glow: rgba(255, 255, 255, 0.15);
+            --glow-intense: 0 0 30px rgba(255, 255, 255, 0.15);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #000; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--text-pure);
+        }
+
+        /* ==========================================================================
+           2. O FRAME DO TIKTOK / REELS (PROPORÇÃO 9:16)
+           ========================================================================== */
+        .post-frame {
+            position: relative;
+            width: 400px; 
+            height: 711px; 
+            background-color: var(--space-void);
+            overflow: hidden; 
+            border-radius: 20px;
+            box-shadow: 0 0 50px rgba(255, 255, 255, 0.1);
+            border: 1px solid #222;
+        }
+
+        /* ==========================================================================
+           3. O UNIVERSO E A BANDEIRA (FUNDO ANIMADO)
+           ========================================================================== */
+        .galactic-vacuum {
+            position: absolute; inset: 0; z-index: 0;
+            background-image: radial-gradient(circle at 50% 40%, rgba(255,255,255,0.03) 0%, var(--space-void) 70%);
+        }
+
+        .stars-deep {
+            position: absolute; width: 200%; height: 200%; top: -50%; left: -50%;
+            background-image: radial-gradient(1.5px 1.5px at 20px 30px, rgba(255,255,255,0.9), transparent), 
+                              radial-gradient(1px 1px at 150px 80px, rgba(255,255,255,0.5), transparent);
+            background-size: 100px 100px; animation: rotateSpace 300s linear infinite;
+        }
+        .stars-mid {
+            position: absolute; width: 200%; height: 200%; top: -50%; left: -50%;
+            background-image: radial-gradient(2px 2px at 50px 150px, #fff, transparent);
+            background-size: 200px 200px; animation: rotateSpace 200s linear infinite reverse; opacity: 0.7;
+        }
+
+        /* Asteroides */
+        .asteroid {
+            position: absolute; width: 100px; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8));
+            opacity: 0; z-index: 1; pointer-events: none;
+        }
+        .asteroid::after {
+            content: ''; position: absolute; top: 50%; right: 0; transform: translateY(-50%);
+            width: 3px; height: 3px; background: #ffffff; border-radius: 50%;
+            box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.9);
+        }
+        .asteroid.a1 { top: 10%; right: 10%; animation: shootAsteroid 6s linear infinite; animation-delay: 1s; }
+        .asteroid.a2 { top: 30%; right: -20%; animation: shootAsteroid 8s linear infinite; animation-delay: 4s; }
+
+        /* Planeta */
+        .orbital-horizon {
+            position: absolute; bottom: -8vh; left: 50%; transform: translateX(-50%);
+            width: 150%; height: 25vh; border-radius: 50% 50% 0 0; z-index: 2;
+            background-color: var(--space-void);
+            background-image: 
+                linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, var(--space-void) 50%),
+                url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.15'/%3E%3C/svg%3E");
+            box-shadow: inset 0 5px 20px rgba(255, 255, 255, 0.2);
+        }
+        .planet-glow {
+            position: absolute; top: -15px; left: 10%; right: 10%; height: 40px;
+            border-radius: 50%; background: radial-gradient(ellipse at center, rgba(200, 200, 255, 0.15) 0%, transparent 70%);
+            filter: blur(20px); z-index: 3;
+        }
+
+        /* Bandeira do Brasil 3D */
+        .planet-flag-wrapper {
+            position: absolute;
+            left: 75%; 
+            top: -42px; 
+            display: flex; align-items: flex-end;
+            height: 55px; z-index: 10; pointer-events: none;
+        }
+        .flag-pole {
+            width: 3px; height: 55px; background-color: var(--text-pure);
+            border-radius: 3px; box-shadow: 0 0 8px rgba(255,255,255,0.5);
+        }
+        .flag-cloth {
+            width: 40px; height: 28px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 70' fill='none' stroke='%23ffffff' stroke-width='5' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='94' height='64' rx='6' /%3E%3Cpolygon points='50 14, 86 35, 50 56, 14 35' /%3E%3Ccircle cx='50' cy='35' r='12' /%3E%3C/svg%3E");
+            background-size: contain; background-repeat: no-repeat;
+            margin-bottom: 24px; margin-left: -1px;
+            transform-origin: left center;
+            animation: flutteringCloth 1.2s ease-in-out infinite alternate;
+            filter: drop-shadow(0 0 10px rgba(255,255,255,0.4));
+        }
+
+        /* Keyframes Globais */
+        @keyframes rotateSpace { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes shootAsteroid { 0% { transform: rotate(150deg) translateX(0); opacity: 1; } 15% { transform: rotate(150deg) translateX(1500px); opacity: 0; } 100% { transform: rotate(150deg) translateX(1500px); opacity: 0; } }
+        @keyframes flutteringCloth { 0% { transform: perspective(300px) rotateY(-20deg) skewY(3deg); } 100% { transform: perspective(300px) rotateY(25deg) skewY(-3deg); } }
+
+        /* ==========================================================================
+           4. TEXTOS E CARD (CONTEÚDO DO POST PREMIUM)
+           ========================================================================== */
+        .post-content {
+            position: absolute; inset: 0; z-index: 20;
+            display: flex; flex-direction: column; justify-content: space-between;
+            padding: 65px 30px 50px; text-align: center;
+        }
+
+        /* Tipografia de Alta Conversão (Poppins Forte) */
+        .hook-title { 
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.4rem; 
+            font-weight: 800; 
+            letter-spacing: 2px; 
+            text-transform: uppercase;
+            color: var(--text-pure); 
+            text-shadow: 0 4px 20px rgba(0,0,0,0.9);
+            margin: 0;
+            transition: all 0.4s ease;
+        }
+        
+        /* Subtítulo elegante, sem ser gritante */
+        .hook-subtitle { 
+            font-family: 'Inter', sans-serif;
+            font-size: 1.05rem; 
+            font-weight: 400; 
+            color: var(--text-silver); 
+            letter-spacing: 0.5px;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.9);
+            margin: 0;
+            transition: all 0.4s ease;
+        }
+
+        /* O Card Central (Glassmorphism Perfeito) */
+        .ns-card {
+            background: rgba(18, 18, 22, 0.5);
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--border-glow); border-radius: var(--border-radius-card);
+            padding: 45px 25px; display: flex; flex-direction: column; align-items: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8), var(--glow-intense);
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .ns-card i { 
+            font-size: 55px; 
+            margin-bottom: 20px; 
+            color: var(--text-pure); 
+            filter: drop-shadow(0 0 15px rgba(255,255,255,0.3)); 
+        }
+        
+        .ns-card h2 { 
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.5rem; 
+            font-weight: 700; 
+            margin-bottom: 10px; 
+            line-height: 1.2; 
+        }
+        
+        .ns-card .tags { 
+            font-family: 'Inter', sans-serif;
+            font-size: 0.7rem; color: var(--text-silver); margin-bottom: 20px; 
+            text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; 
+        }
+        
+        .ns-card .badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; margin-bottom: 24px;
+        }
+        
+        .ns-card p { 
+            font-size: 0.95rem; color: var(--text-silver); 
+            line-height: 1.6; margin: 0; font-weight: 400;
+        }
+
+        /* Animação da Lua Piscando */
+        @keyframes blinkMoon {
+            0%, 100% { opacity: 1; filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.9)); transform: scale(1); }
+            50% { opacity: 0.4; filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.2)); transform: scale(0.95); }
+        }
+        .moon-blink { animation: blinkMoon 1.5s ease-in-out infinite; }
+
+        /* ==========================================================================
+           5. A TELA PRETA FINAL (ANIMAÇÃO DE ENTRADA CINEMATOGRÁFICA)
+           ========================================================================== */
+        .outro-screen {
+            position: absolute; inset: 0; z-index: 100;
+            background-color: var(--space-void); 
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            
+            /* A MÁGICA: Começa invisível e maior */
+            opacity: 0; 
+            visibility: hidden;
+            transform: scale(1.1); 
+            transition: opacity 0.8s ease, transform 0.8s ease, visibility 0.8s;
+        }
+
+        /* Quando ativada, ela reduz o tamanho e aparece suavemente */
+        .outro-screen.active {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
+        }
+
+        .outro-logo {
+            display: flex; align-items: center; gap: 15px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 2.2rem; color: var(--text-pure); letter-spacing: 1px;
+        }
+        
+        .outro-logo span { font-weight: 400; }
+        .outro-logo strong { font-weight: 800; }
+
+        /* Fonte Elegante no "link na bio" */
+        .outro-link {
+            font-family: 'Inter', sans-serif;
+            margin-top: 25px; 
+            font-size: 1.1rem; 
+            font-weight: 400;
+            color: var(--text-silver); 
+            text-transform: lowercase; 
+            letter-spacing: 2px;
+        }
+
+        .recording-tip { position: absolute; top: -40px; left: 50%; transform: translateX(-50%); color: #666; font-size: 12px; width: 100%; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <p class="recording-tip">DICA: Tudo corrigido. Dê REC na tela!</p>
+
+    <div class="post-frame">
+        
+        <div class="galactic-vacuum">
+            <div class="stars-deep"></div>
+            <div class="stars-mid"></div>
+            
+            <div class="asteroid a1"></div>
+            <div class="asteroid a2"></div>
+
+            <div class="orbital-horizon">
+                <div class="planet-flag-wrapper">
+                    <div class="flag-pole"></div>
+                    <div class="flag-cloth"></div>
+                </div>
+                <div class="planet-glow"></div>
+            </div>
+        </div>
+
+        <div class="post-content">
+            <h1 class="hook-title" id="postTopText">PROJETO NOVASTACK</h1>
+
+            <div class="ns-card" id="postCard">
+                <i id="cardIcon" class="ph-light ph-rocket-launch"></i>
+                <h2 id="cardTitle">O que é a NovaStack?</h2>
+                <div class="tags" id="cardTags">CÓDIGO • LÓGICA • EVOLUÇÃO</div>
+                
+                <div class="badge">
+                    <i class="ph ph-stack"></i> <span id="cardBadge">Base de Conhecimento</span>
+                </div>
+                
+                <p id="cardDesc">A plataforma definitiva para sair do zero e dominar o desenvolvimento web construindo aplicações reais.</p>
+            </div>
+
+            <h2 class="hook-subtitle" id="postBottomText">O que é a plataforma e como funciona?</h2>
+        </div>
+
+        <div id="outroScreen" class="outro-screen">
+            <div class="outro-logo">
+                <svg width="45" height="45" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                    <polyline points="2 17 12 22 22 17"></polyline>
+                    <polyline points="2 12 12 17 22 12"></polyline>
+                </svg>
+                <span>NOVA<strong>STACK</strong></span>
+            </div>
+            <div class="outro-link">link na bio</div>
+        </div>
+
+    </div>
+
+    <script>
+        // O CONTEÚDO DOS CARDS COM O PORTUGUÊS CORRIGIDO
+        const posts = [
+            {
+                topText: "PROJETO NOVASTACK",
+                icon: "ph-rocket-launch",
+                title: "O que é a NovaStack?",
+                tags: "CÓDIGO • LÓGICA • EVOLUÇÃO",
+                badge: "Base de Conhecimento",
+                desc: "A plataforma definitiva para sair do zero e dominar o desenvolvimento web construindo aplicações reais.",
+                bottomText: "O que é a plataforma e como funciona?"
+            },
+            {
+                topText: "A BASE DE TUDO",
+                icon: "ph-brain",
+                title: "Lógica e Algoritmos",
+                tags: "ESTRUTURAS • FUNDAMENTOS",
+                badge: "O Primeiro Passo",
+                desc: "Entenda exatamente como o computador pensa antes de escrever a sua primeira linha de código.",
+                bottomText: "Por onde começar na programação?"
+            },
+            {
+                topText: "SEU PRIMEIRO PORTFÓLIO",
+                icon: "ph-terminal-window",
+                title: "Projetos Reais",
+                tags: "HTML • CSS • JAVASCRIPT",
+                badge: "Mão na Massa",
+                desc: "Chega de teoria chata. Aqui você constrói o seu portfólio prático com Calculadora de IMC, Pokedex e To-Do List.",
+                bottomText: "Ganhando experiência na prática."
+            },
+            {
+                topText: "O CONVITE ESTÁ FEITO",
+                icon: "ph-moon-stars moon-blink", /* Lua Piscando */
+                title: "Inicie sua Jornada",
+                tags: "100% GRATUITO • COMUNIDADE",
+                badge: "Acesso Liberado",
+                desc: "Venha para a NovaStack e aprenda programação gratuitamente. A fronteira te espera.",
+                bottomText: "Iniciando protocolo de aprendizado..."
+            }
+        ];
+
+        // Começamos do 1, porque o HTML já está com as informações do 0. Assim não dá o bug do piscar rápido no início!
+        let currentIndex = 1;
+
+        function runPresentation() {
+            // Roda os cards se ainda houver conteúdo (6s cada)
+            if (currentIndex < posts.length) {
+                
+                const data = posts[currentIndex];
+                const card = document.getElementById('postCard');
+                const topText = document.getElementById('postTopText');
+                const bottomText = document.getElementById('postBottomText');
+                
+                // Animação de saída: Some e desce levemente
+                card.style.opacity = 0;
+                card.style.transform = 'scale(0.95) translateY(10px)';
+                topText.style.opacity = 0;
+                bottomText.style.opacity = 0;
+
+                // Troca as informações enquanto estão invisíveis (400ms de delay)
+                setTimeout(() => {
+                    topText.textContent = data.topText;
+                    document.getElementById('cardIcon').className = `ph-light ${data.icon}`;
+                    document.getElementById('cardTitle').textContent = data.title;
+                    document.getElementById('cardTags').textContent = data.tags;
+                    
+                    // ATENÇÃO AQUI: Atualizando apenas o texto do span, sem duplicar o ícone!
+                    document.getElementById('cardBadge').textContent = data.badge;
+                    
+                    document.getElementById('cardDesc').textContent = data.desc;
+                    bottomText.textContent = data.bottomText;
+                    
+                    // Faz tudo aparecer de volta
+                    card.style.opacity = 1;
+                    card.style.transform = 'scale(1) translateY(0)';
+                    topText.style.opacity = 1;
+                    bottomText.style.opacity = 1;
+                }, 400);
+
+                currentIndex++;
+                setTimeout(runPresentation, 6000); 
+
+            } else {
+                // FIM DO CICLO: Mostra a Tela Preta (10s)
+                document.getElementById('outroScreen').classList.add('active');
+                
+                // Prepara o retorno para o primeiro slide silenciosamente por trás da tela preta
+                setTimeout(() => {
+                    const reset = posts[0];
+                    document.getElementById('postTopText').textContent = reset.topText;
+                    document.getElementById('cardIcon').className = `ph-light ${reset.icon}`;
+                    document.getElementById('cardTitle').textContent = reset.title;
+                    document.getElementById('cardTags').textContent = reset.tags;
+                    document.getElementById('cardBadge').textContent = reset.badge;
+                    document.getElementById('cardDesc').textContent = reset.desc;
+                    document.getElementById('postBottomText').textContent = reset.bottomText;
+                    
+                    // Tira a tela preta com o efeito de fade-out
+                    document.getElementById('outroScreen').classList.remove('active');
+                    
+                    // Reinicia a contagem e chama a função para virar um looping infinito!
+                    currentIndex = 1;
+                    setTimeout(runPresentation, 6000);
+                }, 10000);
+            }
+        }
+
+        // A apresentação começa exatos 6 segundos depois que a página HTML carregar!
+        setTimeout(runPresentation, 6000);
+
+    </script>
+</body>
+</html>
