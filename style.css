@@ -1073,6 +1073,9 @@ button { font-family: inherit; outline: none; }
     .ns-search-mini input { width: 120px; }
 }
 
+/* ==========================================================================
+   11. MEDIA QUERIES (CORREÇÃO MOBILE PLANETÁRIA)
+   ========================================================================== */
 @media (max-width: 768px) {
     .ns-container { padding: 0 20px; }
     .ns-hero__title { font-size: 2.2rem; }
@@ -1080,18 +1083,69 @@ button { font-family: inherit; outline: none; }
     .ns-search-mini { display: none; }
     .ns-username { display: none; }
     .ns-carousel-arrow { display: none; }
+    
+    /* AJUSTE DO PLANETA NO CELULAR */
+    .orbital-horizon { 
+        bottom: -75vh; /* Empurra o planeta bem mais para baixo */
+        width: 350vw;  /* Deixa o planeta muito mais largo para a curva ficar suave */
+        height: 100vh;
+        left: 50%;
+        transform: translateX(-50%);
+    } 
+
+    /* REPOSICIONANDO A CADEIRA NO MOBILE */
+    .planet-chair-wrapper {
+        left: 57% !important; /* Afasta da bandeira */
+        top: -29px !important; /* Ajusta a altura no "chão" novo */
+        width: 38px !important; /* Diminui um pouco para não poluir */
+        height: 38px !important;
+    }
+
+    /* REPOSICIONANDO A BANDEIRA NO MOBILE */
+    .planet-flag-wrapper {
+        left: 60% !important; /* Afasta da cadeira */
+        top: -39px !important;
+        transform: scale(0.8) !important; /* Deixa a bandeira menorzinha */
+    }
+    
+    /* AJUSTES DE INTERFACE */
     .ns-modal { width: 95%; max-height: 90vh; }
     .ns-modal__header { flex-direction: column; gap: 16px; position: relative;}
     .ns-modal__close { position: absolute; top: 20px; right: 20px; }
     .ns-course-item { flex-direction: column; align-items: flex-start; gap: 16px; }
     .ns-notification-panel { right: 10px; width: calc(100% - 20px); }
     
-    /* Curva do planeta ajustada para celular */
-    .orbital-horizon { bottom: -30vh; width: 200vw; height: 100vh; } 
-    
-    /* Esconde os astronautas no mobile para não poluir ou quebrar a leitura */
-    .astro-hero, .astro-planet { display: none; }
+    .astro-hero { display: none !important; }
+
+    /* CONFIGURA O SATÉLITE PARA SOBREVOAR */
+    .ns-satellite-mobile {
+        display: block !important;
+        position: absolute;
+        width: 60px; /* Tamanho do satélite */
+        z-index: 10;
+        top: 50%;    /* Altura que ele vai ficar */
+        left: 25%;   /* Posição inicial */
+        opacity: 0.8;
+        filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2));
+        
+        /* ATIVA A ANIMAÇÃO DE VOO */
+        animation: satelliteOrbit 8s ease-in-out infinite;
+    }
+
+    /* ANIMAÇÃO DE MOVIMENTO ORBITAL */
+    @keyframes satelliteOrbit {
+        0%, 100% {
+            transform: translate(0, 0) rotate(5deg);
+        }
+        50% {
+            transform: translate(30px, -20px) rotate(-5deg);
+        }
+    }
 }
+
+/* ESCONDE O SATÉLITE POR PADRÃO NO COMPUTADOR */
+.ns-satellite-mobile { display: none; }
+
 /* ==========================================================================
    SISTEMA GALÁCTICO IMERSIVO DO MODAL (ATUALIZADO)
    ========================================================================== */
