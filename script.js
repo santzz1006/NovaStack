@@ -455,19 +455,28 @@ const ModalController = {
 };
 
 /**
- * Módulo de Carga de Dados
+ * Módulo de Carga de Dados (Corrigido para aceitar cursos.js)
  */
 const DatabaseManager = {
     async fetchJSON() {
         try {
+            // Verifica se o arquivo cursos.js já carregou a variável na memória do navegador
+            if (typeof cursos !== 'undefined') {
+                NovaDB.state.cursos = bancoDeCursos;
+                NovaDB.state.cursosCarregados = true;
+                console.log("✅ Base de Conhecimento Carregada via JS:", NovaDB.state.cursos.length, "protocolos");
+                return;
+            }
+
+            // Plano B: Se a variável não existir, tenta baixar como JSON
             const resp = await fetch("cursos.json");
             NovaDB.state.cursos = await resp.json();
             NovaDB.state.cursosCarregados = true;
-            console.log("✅ Base de Conhecimento Carregada:", NovaDB.state.cursos.length, "protocolos");
+            console.log("✅ Base de Conhecimento Carregada via JSON:", NovaDB.state.cursos.length, "protocolos");
+            
         } catch (error) {
-            console.error("❌ Falha crítica ao conectar com cursos.json:", error);
+            console.error("❌ Falha ao conectar com a base de cursos:", error);
             NovaDB.state.cursos = [];
-            // Mesmo com erro, liberamos para não travar a interface
             NovaDB.state.cursosCarregados = true; 
         }
     }
