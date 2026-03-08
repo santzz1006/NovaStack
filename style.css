@@ -44,7 +44,6 @@ body {
     overflow-x: hidden;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
-    overscroll-behavior-y: none;
     
 }
 
@@ -63,7 +62,7 @@ button { font-family: inherit; outline: none; }
    3. FUNDO GALÁCTICO & VISÃO PLANETÁRIA (TEXTURA LUNAR)
    ========================================================================== */
 .galactic-vacuum {
-    position: fixed;
+    position: absolute;
     inset: 0;
     z-index: -10;
     background-color: var(--space-void);
@@ -271,12 +270,19 @@ button { font-family: inherit; outline: none; }
     z-index: -5;
     background-color: var(--space-void); 
     
-    /* Degradê de fade out + SVG Noise + Fundo cinza */
+   /* AQUI ESTÁ A MUDANÇA: ADICIONAMOS O DEGRADÊ DE SAÍDA */
     background-image: 
-        linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, var(--space-void) 50%),
-        url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.15'/%3E%3C/svg%3E"),
-        radial-gradient(circle at top, #2a2a35 0%, var(--space-void) 60%);
+        /* 1. O Novo Degradê de Fade-Out no fundo (MUST BE FIRST) */
+        linear-gradient(to bottom, rgba(0,0,0,0) 60%, var(--space-void) 100%),
         
+        /* 2. O Degradê de Fade-Out que você já tinha (MANTENHA) */
+        linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, var(--space-void) 50%),
+        
+        /* 3. O SVG Noise (MANTENHA) */
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.15'/%3E%3C/svg%3E"),
+        
+        /* 4. O Radial Gradient do centro (MANTENHA) */
+        radial-gradient(circle at top, #2a2a35 0%, var(--space-void) 60%);
     background-size: 100% 100%, 300px 300px, 100% 100%;
     background-repeat: no-repeat, repeat, no-repeat;
     box-shadow: inset 0 5px 20px rgba(255, 255, 255, 0.2);
@@ -1035,20 +1041,16 @@ button { font-family: inherit; outline: none; }
    10. FOOTER 
    ========================================================================== */
 .ns-footer {
-    position: relative;
-    z-index: 10;
+    position: relative; /* Volta a ser um elemento normal da página */
+    z-index: 10; 
+    
     border-top: 1px solid var(--border-subtle);
     background: rgba(2,2,2,0.9);
     backdrop-filter: blur(20px);
-    padding: 60px 0 20px;
-    margin-top: 80px; 
-}
-
-.ns-footer__grid {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr;
-    gap: 40px;
-    margin-bottom: 60px;
+    
+    /* Espaçamentos normais para não ficar espremido no final */
+    padding: 60px 0 20px; 
+    margin-top: 80px; /* Empurra ele para baixo, longe dos cursos */
 }
 
 .ns-footer__brand p { color: var(--text-silver); margin-top: 16px; max-width: 300px; }
