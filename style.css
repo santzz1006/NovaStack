@@ -44,9 +44,8 @@ body {
     overflow-x: hidden;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
-    /* ======== CORREÇÃO DO EFEITO ELÁSTICO (RUBBER-BANDING) ======== */
-    background-color: #0a0a0c !important; /* Pinta o "vazio" atrás do site */
-    overscroll-behavior-y: none !important; /* Trava o "puxão" da tela */
+    overscroll-behavior-y: none;
+    
 }
 
 a { text-decoration: none; color: inherit; }
