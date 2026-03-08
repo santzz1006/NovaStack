@@ -460,23 +460,23 @@ const ModalController = {
 const DatabaseManager = {
     async fetchJSON() {
         try {
-            // Verifica se o arquivo cursos.js já carregou a variável na memória do navegador
-            if (typeof cursos !== 'undefined') {
+            // Como vimos no console, o navegador já conhece a variável bancoDeCursos
+            if (typeof bancoDeCursos !== 'undefined') {
                 NovaDB.state.cursos = bancoDeCursos;
                 NovaDB.state.cursosCarregados = true;
-                console.log("✅ Base de Conhecimento Carregada via JS:", NovaDB.state.cursos.length, "protocolos");
+                console.log("✅ Base de Conhecimento conectada com sucesso:", NovaDB.state.cursos.length, "protocolos.");
                 return;
             }
 
-            // Plano B: Se a variável não existir, tenta baixar como JSON
+            // Se por algum motivo a variável não estiver lá, ele tenta o plano B
+            console.warn("⚠️ bancoDeCursos não encontrado. Verificando fallback...");
             const resp = await fetch("cursos.json");
-            NovaDB.state.cursos = await resp.json();
-            NovaDB.state.cursosCarregados = true;
-            console.log("✅ Base de Conhecimento Carregada via JSON:", NovaDB.state.cursos.length, "protocolos");
-            
+            if (resp.ok) {
+                NovaDB.state.cursos = await resp.json();
+                NovaDB.state.cursosCarregados = true;
+            }
         } catch (error) {
-            console.error("❌ Falha ao conectar com a base de cursos:", error);
-            NovaDB.state.cursos = [];
+            console.error("❌ Erro fatal ao acessar a base de dados:", error);
             NovaDB.state.cursosCarregados = true; 
         }
     }
